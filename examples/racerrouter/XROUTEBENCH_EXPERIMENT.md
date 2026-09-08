@@ -64,3 +64,34 @@ The reported settings were chosen through exploratory validation tuning; this
 command reproduces the selected configuration, not the full search. See the
 selection disclosure in [VALIDATION.md](VALIDATION.md). Use an independent test
 or prespecified OOD evaluation before drawing generalization conclusions.
+
+## GPU validation
+
+The embedding example accepts `--device cuda` (or `cuda:N`) and uses FP32 with
+TF32 disabled. Use a separate data directory so an existing CPU embedding cache
+is not reused. For example, after completing the CPU data preparation:
+
+```bash
+mkdir -p examples/racerrouter/data/xroutebench_gpu_validation/prepared
+cp examples/racerrouter/data/xroutebench/prepared/{queries.json,manifest.json,train.jsonl,validation.jsonl} examples/racerrouter/data/xroutebench_gpu_validation/prepared/
+ln -s ../xroutebench/bge-m3 examples/racerrouter/data/xroutebench_gpu_validation/bge-m3
+python examples/racerrouter/embed_xroutebench.py --data examples/racerrouter/data/xroutebench_gpu_validation --device cuda --threads 2 --batch-size 4
+```
+
+Create a training config using the GPU directory's training records,
+`embeddings_train_ready.pt`, `embedding.json`, and explicit validation records.
+For the single-run compatibility check, use budget 7.7226, seed 42, and the tuned
+parameters above, with a separate checkpoint output path. Run it through the
+standard training CLI:
+
+```bash
+llmrouter train --router racerrouter --config /path/to/gpu_config.yaml --device cuda
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 LITELLM_LOCAL_MODEL_COST_MAP=True python -m pytest -q tests/test_racerrouter_training.py -k cuda
+```
+
+The CUDA tests exercise both RACER and ACER, GPU training, checkpoint loading
+on CPU, and inference after moving the restored model back to GPU. They skip
+when CUDA is unavailable. Cross-device probability comparisons use
+`rtol=1e-5, atol=1e-6`; CPU and GPU training trajectories need not be identical.
+The multi-run `run_xroutebench.py` remains a CPU experiment runner; use the
+standard CLI above for this GPU check.

@@ -18,9 +18,16 @@ def main():
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--max-length", type=int, default=2048)
+    parser.add_argument("--device", default="cpu", help="cpu, cuda, or cuda:N")
     args = parser.parse_args()
+    device = torch.device(args.device)
+    if device.type == "cuda" and not torch.cuda.is_available():
+        parser.error("CUDA was requested but is unavailable in this environment")
     torch.set_num_threads(args.threads)
     torch.set_num_interop_threads(1)
+    if device.type == "cuda":
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
     target = args.data / "prepared"
     query_bytes = (target / "queries.json").read_bytes()
     queries = json.loads(query_bytes)
@@ -49,8 +56,8 @@ def main():
     )
     model = AutoModel.from_pretrained(
         args.data / "bge-m3", local_files_only=True
-    ).eval()
-    print("Loaded BGE-M3 float32 on CPU", flush=True)
+    ).to(device=device, dtype=torch.float32).eval()
+    print(f"Loaded BGE-M3 float32 on {device}", flush=True)
     tokens = tokenizer(
         [q["query"] for q in queries], truncation=False, add_special_tokens=True
     )["input_ids"]
@@ -89,11 +96,11 @@ def main():
                 truncation=True,
                 max_length=args.max_length,
                 return_tensors="pt",
-            )
+            ).to(device)
             outputs = model(**inputs).last_hidden_state[:, 0]
             embedding = torch.nn.functional.normalize(outputs, p=2, dim=1)
             assert torch.isfinite(embedding).all()
-            vectors[indexes] = embedding
+            vectors[indexes] = embedding.cpu()
             done[indexes] = True
             now = time.monotonic()
             if now - last_saved >= 30 or offset + args.batch_size >= len(remaining):
@@ -126,6 +133,13 @@ def main():
                 max_original_length=max(lengths),
                 threads=args.threads,
                 batch_size=args.batch_size,
+                device=str(device),
+                torch_version=str(torch.__version__),
+                cuda_version=torch.version.cuda,
+                gpu_name=(
+                    torch.cuda.get_device_name(device)
+                    if device.type == "cuda" else None
+                ),
                 elapsed_this_run_seconds=time.monotonic() - start,
             ),
             indent=2,

@@ -52,6 +52,37 @@ def test_infeasible_budget_is_reported(tmp_path):
     assert result["budget_violation"] > 0
 
 
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is unavailable")
+@pytest.mark.parametrize("robust", [False, True])
+def test_cuda_training_and_cross_device_checkpoint(tmp_path, robust):
+    path, config, _, vectors = config_file(tmp_path, robust=robust)
+    router = RACERRouter(str(path))
+    summary = RACERTrainer(router, device="cuda").train()
+    assert next(router.model.parameters()).device.type == "cuda"
+    assert summary["method"] == ("RACER" if robust else "ACER")
+    inputs = [dict(embedding=v) for v in vectors]
+    expected = router.predict_proba(inputs)
+    assert torch.isfinite(expected).all()
+    torch.testing.assert_close(expected.sum(1), torch.ones(len(vectors)))
+
+    inference = write_config(
+        tmp_path / "inference.yaml",
+        dict(model_path=dict(load_model_path=config["model_path"]["save_model_path"])),
+    )
+    restored = RACERRouter(str(inference))
+    assert next(restored.model.parameters()).device.type == "cpu"
+    torch.testing.assert_close(
+        restored.predict_proba(inputs), expected, rtol=1e-5, atol=1e-6
+    )
+    restored.model.to("cuda")
+    torch.testing.assert_close(
+        restored.predict_proba([dict(embedding=v.cuda()) for v in vectors]),
+        expected,
+        rtol=1e-5,
+        atol=1e-6,
+    )
+
+
 def test_rejects_composite_reward_configuration(tmp_path):
     path, config, _, _ = config_file(tmp_path)
     config["metric"] = dict(weights=dict(performance=1, cost=0.5))
