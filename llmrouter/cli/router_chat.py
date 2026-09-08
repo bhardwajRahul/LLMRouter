@@ -18,6 +18,7 @@ from llmrouter.models import (
     KNNRouter,
     SVMRouter,
     MLPRouter,
+    RACERRouter,
     MFRouter,
     EloRouter,
     DCRouter,
@@ -352,6 +353,7 @@ def _normalize_chat_history(history: Any) -> list[tuple[str, str]]:
 
 # Router registry: maps router method names to their classes
 ROUTER_REGISTRY = {
+    "racerrouter": RACERRouter,
     "knnrouter": KNNRouter,
     "svmrouter": SVMRouter,
     "mlprouter": MLPRouter,
