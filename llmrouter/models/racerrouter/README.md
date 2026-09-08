@@ -7,9 +7,9 @@ Each candidate pair and budget requires its own trained checkpoint.
 
 This implementation follows [onepounchman/RACER at 9d80ecc](https://github.com/onepounchman/RACER/tree/9d80eccb5cae14684e372bce35929c6c8a13cead),
 especially `racer/policy.py`, `racer/trainer.py`, and `racer/evaluator.py`.
-The reference work is **Reasoning Is Not Free: Robust Adaptive Cost-Efficient
-Routing for LLM-as-a-Judge**, Wenbo Zhang, Lijinghua Zhang, Liner Xiang, and Hengrui
-Cai (2026). See the upstream README for the paper citation and original experiments.
+RACER was introduced in the **ICML 2026** paper
+[Reasoning Is Not Free: Robust Adaptive Cost-Efficient Routing for LLM-as-a-Judge](https://openreview.net/forum?id=NoP2UQymHU).
+See the paper and upstream repository for the original experiments.
 
 **Training data**
 

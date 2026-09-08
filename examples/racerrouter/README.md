@@ -1,5 +1,8 @@
 # RACER examples
 
+RACER was introduced in the **ICML 2026** paper
+[Reasoning Is Not Free: Robust Adaptive Cost-Efficient Routing for LLM-as-a-Judge](https://openreview.net/forum?id=NoP2UQymHU).
+
 See the [router guide](../../llmrouter/models/racerrouter/README.md) for the
 offline synthetic demo, configuration, ACER switch and inference contracts.
 
