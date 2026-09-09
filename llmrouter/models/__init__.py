@@ -13,6 +13,8 @@ from .svmrouter import SVMRouterTrainer
 from .mlprouter import MLPRouter
 from .mlprouter import MLPTrainer
 
+from .racerrouter import RACERRouter, RACERTrainer
+
 from .mfrouter import MFRouter
 from .mfrouter import MFRouterTrainer
 
@@ -82,6 +84,9 @@ __all__ = [
 
     "MLPRouter",
     "MLPTrainer",
+
+    "RACERRouter",
+    "RACERTrainer",
 
     "MFRouter",
     "MFRouterTrainer",

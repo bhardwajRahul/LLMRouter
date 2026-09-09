@@ -16,6 +16,8 @@ from llmrouter.models import (
     KNNRouter,
     SVMRouter,
     MLPRouter,
+    RACERRouter,
+    RACERTrainer,
     MFRouter,
     EloRouter,
     DCRouter,
@@ -47,6 +49,7 @@ from llmrouter.models.knnmultiroundrouter import KNNMultiRoundRouterTrainer
 
 # Router registry: maps router method names to (router_class, trainer_class) tuples
 ROUTER_TRAINER_REGISTRY: Dict[str, Tuple[Any, Any]] = {
+    "racerrouter": (RACERRouter, RACERTrainer),
     "knnrouter": (KNNRouter, KNNRouterTrainer),
     "svmrouter": (SVMRouter, SVMRouterTrainer),
     "mlprouter": (MLPRouter, MLPTrainer),

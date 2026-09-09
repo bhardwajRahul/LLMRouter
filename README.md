@@ -78,6 +78,7 @@
 | `knnrouter` | ✅ | ✅ | K-Nearest Neighbors based routing | [📖](llmrouter/models/knnrouter/README.md) |
 | `svmrouter` | ✅ | ✅ | Support Vector Machine based routing | [📖](llmrouter/models/svmrouter/README.md) |
 | `mlprouter` | ✅ | ✅ | Multi-Layer Perceptron based routing | [📖](llmrouter/models/mlprouter/README.md) |
+| `racerrouter` | ✅ | ✅ | Robust adaptive cost-efficient routing | [📖](llmrouter/models/racerrouter/README.md) |
 | `mfrouter` | ✅ | ✅ | Matrix Factorization based routing | [📖](llmrouter/models/mfrouter/README.md) |
 | `elorouter` | ✅ | ✅ | Elo Rating based routing | [📖](llmrouter/models/elorouter/README.md) |
 | `routerdc` | ✅ | ✅ | Dual Contrastive learning based routing | [📖](llmrouter/models/routerdc/README.md) |
